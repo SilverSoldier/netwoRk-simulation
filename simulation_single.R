@@ -5,11 +5,7 @@ TRIALS <- 10000
 U <- 0.05 ## 
 noise <- `^`(10, -5)/U
 
-source("coverage_base.R")
-
-decibelToWatt = function(D) {
-    `^`(10, D/10)
-}
+source("coverage_single.R")
 
 ## Verified - function to find euclidean distance between 2 points
 distance = function(x1, y1, x2, y2) {
@@ -28,7 +24,7 @@ sinr = function(i, x, y, g, h, N, R) {
     return (num/denom)
 }
 
-coverageForT = function(L, T) {
+coverageActual = function(L, T) {
     ## Number of towers is a poisson distribution
     Ns <- rpois(TRIALS, L)
     num <- 0
@@ -64,9 +60,10 @@ coverageForT = function(L, T) {
 plotCoverageActual = function(L, d){
     decibel = seq(-10, 20, d)
     watts = sapply(decibel, decibelToWatt)
-    y1 = sapply(watts, coverageForT, L = L)
+    y1 = sapply(watts, coverageActual, L = L)
     y2 = sapply(watts, coverage, L =  L, SNR = (1/(U*noise)), alpha = A)
     header = paste("Coverage Probability (alpha, Noise, U, Lambda, Trials) = (", A, ",", noise, ",", U, ", ", L, ", ", TRIALS, ")", sep = " ")
     plot(decibel, y1, type = "l", xlim = c(-10, 20), ylim = c(0.1, 1), xlab = "SINR Threshold (dB)", ylab = "Probability of Coverage", main = header, col = "blue")
     lines(decibel, y2, col = "red")
+    legend("top", legend=c("Actual", "Theoretical"), col=c("blue", "red"), lty=c(1, 1))
 }
